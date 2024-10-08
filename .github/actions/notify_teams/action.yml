@@ -112,7 +112,7 @@ runs:
                       }
                     ]
                   }' \
-               "${{ secrets.WEBHOOK_URL }}"
+               "${{ secrets.TEAMS_WEBHOOK_URL }}"  # Corrected secret reference
         else
           curl -H 'Content-Type: application/json' \
                -d '{
@@ -154,5 +154,5 @@ runs:
                       }
                     ]
                   }' \
-               "${{ secrets.WEBHOOK_URL }}"
+               "${{ secrets.TEAMS_WEBHOOK_URL }}"  # Corrected secret reference
         fi
