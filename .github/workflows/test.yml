@@ -21,7 +21,7 @@ jobs:
       - name: Simulate Test
         run: |
           # Simulate a failure for demonstration purposes
-          # exit 1  # Change this to `exit 0` for a successful run
+          exit 1  # Change this to `exit 0` for a successful run
 
       - name: Notify Teams
         if: always()
