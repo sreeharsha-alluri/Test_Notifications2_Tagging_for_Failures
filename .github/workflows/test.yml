@@ -1,40 +1,65 @@
-name: CI Workflow
+name: Notify Teams Example
 
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
-  build:
+  linux-build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      # Add your build steps here
-      - name: Build
-        run: echo "Building the project..."
-
-      # Example step to simulate success or failure
-      - name: Simulate Test
+      - name: Build Step
+        id: build
         run: |
-          # Simulate a failure for demonstration purposes
-          exit 1  # Change this to `exit 0` for a successful run
+          echo "Building the project"
+          echo "Build completed successfully."
+          echo "status=success" >> $GITHUB_ENV
 
-      - name: Notify Teams
-        if: always()
-        uses: ./.github/actions/notify_teams
+  overall_status:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: linux-build-and-test
+    outputs:
+      overall_status: ${{ steps.set-status.outputs.overall_status }}
+      notification_message: ${{ steps.set-status.outputs.notification_message }}
+    steps:
+      - name: Set Status
+        id: set-status
+        run: |
+          if [[ "${{ needs.linux-build-and-test.result }}" == "success" ]]; then
+            overall_status="success"
+            notification_message="The build and test completed successfully."
+          else
+            overall_status="failure"
+            notification_message="The build and test failed. Please check the logs."
+          fi
+          echo "overall_status=$overall_status" >> $GITHUB_OUTPUT
+          echo "notification_message=$notification_message" >> $GITHUB_OUTPUT
+
+  teams-notification:
+    name: Notification
+    if: always()
+    runs-on: ubuntu-latest
+    needs: overall_status
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Send Notifications
+        uses: ./.github/actions/notify_teams  # Path to your composite action
         with:
-          overall-status: ${{ job.status }}
-          run-url: ${{ github.run_url }}
-          action-name: "Build and Test"
-          workflow-status: "CI Workflow"
-          user1-name: ${{ vars.TEAMS_USER1_NAME }}
-          user1-id: ${{ vars.TEAMS_USER1_ID }}
-          user2-name: ${{ vars.TEAMS_USER2_NAME }}
-          user2-id: ${{ vars.TEAMS_USER2_ID }}
-          user3-name: ${{ vars.TEAMS_USER3_NAME }}
-          user3-id: ${{ vars.TEAMS_USER3_ID }}
-          teams-webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}  # Pass secret as input
+          action-name: ${{ github.workflow }}  # Pass the workflow name
+          overall-status: ${{ needs.overall_status.outputs.overall_status }}  # Pass the overall status
+          run-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}  # Pass the run URL
+          workflow-status: ${{ needs.overall_status.outputs.notification_message }}  # Pass the notification message
+          user1-name: ${{ vars.TEAMS_USER1_NAME }}  # User 1 name from repository variables
+          user1-id: ${{ vars.TEAMS_USER1_ID }}      # User 1 ID from repository variables
+          user2-name: ${{ vars.TEAMS_USER2_NAME }}  # User 2 name from repository variables
+          user2-id: ${{ vars.TEAMS_USER2_ID }}      # User 2 ID from repository variables
+          user3-name: ${{ vars.TEAMS_USER3_NAME }}  # User 3 name from repository variables
+          user3-id: ${{ vars.TEAMS_USER3_ID }}      # User 3 ID from repository variables
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}  # Pass the webhook URL from secrets
