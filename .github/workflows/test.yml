@@ -62,4 +62,4 @@ jobs:
           user2-id: ${{ vars.TEAMS_USER2_ID }}      # User 2 ID from repository variables
           user3-name: ${{ vars.TEAMS_USER3_NAME }}  # User 3 name from repository variables
           user3-id: ${{ vars.TEAMS_USER3_ID }}      # User 3 ID from repository variables
-          webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}  # Pass the webhook URL from secrets
+          teams-webhook-url: ${{ secrets.TEAMS_WEBHOOK_URL }}  # Pass secret as input
