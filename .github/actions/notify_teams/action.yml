@@ -32,6 +32,9 @@ inputs:
   user3-id:
     description: 'ID of user 3'
     required: true
+  teams-webhook-url:
+    description: 'Webhook URL for Microsoft Teams'
+    required: true  # Make sure to set this to true
 
 runs:
   using: "composite"
@@ -112,7 +115,7 @@ runs:
                       }
                     ]
                   }' \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}"  # Corrected secret reference
+               "${{ inputs.teams-webhook-url }}"  # Updated to use input instead of secret
         else
           curl -H 'Content-Type: application/json' \
                -d '{
@@ -154,5 +157,5 @@ runs:
                       }
                     ]
                   }' \
-               "${{ secrets.TEAMS_WEBHOOK_URL }}"  # Corrected secret reference
+               "${{ inputs.teams-webhook-url }}"  # Updated to use input instead of secret
         fi
