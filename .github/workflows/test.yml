@@ -16,7 +16,6 @@ jobs:
         id: build
         run: |
           echo "Building the project"
-          # Simulate a successful build
           echo "Build completed successfully."
           echo "status=success" >> $GITHUB_ENV
 
