@@ -17,6 +17,7 @@ jobs:
         run: |
           echo "Building the project"
           echo "Build completed successfully."
+          exit 1
           echo "status=success" >> $GITHUB_ENV
 
   overall_status:
